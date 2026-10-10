@@ -20,48 +20,48 @@ Confidence: {self.__confidence}
 """
 
     def Run(self, filePath):
-        self.__ParseEmlFile(filePath)
+        self.__ParseEmlHeaders(filePath)
 
-    def __ParseHeaders(self, headerString):
+    def __HeadersToKV(self, headerString):
         if re.match(r"^[A-Za-z-]+:\s?.*$", headerString):
             parts = headerString.split(":", 1)
             return parts[0], parts[1].strip()
         else:
             raise ValueError("Invalid header string format")
 
-    def __ParseEmlFile(self, filePath):
+    def __ParseEmlHeaders(self, filePath):
         if os.path.isfile(filePath) and os.path.exists(filePath) and filePath.endswith(".eml"):
             ctype = "" # store content type string
 
-            # read whole file
-            with open(filePath, 'r') as eml:
-                contents = eml.readlines()
+            with open(filePath, 'r', errors="ignore") as eml:
+                while (True):
+                    line = eml.readline()
 
-            # parse each line until a single \n
-            for line in contents:
-                if line == "\n":
-                    break
+                    # parse each line until a single \n or a blank line
+                    if line == "\n" or line == "":
+                        break
 
-                if line.lower().startswith("content-type") or line.lower().startswith("\t"):
-                    ctype += line.strip() # collect all the content-type into a single line
-                else:
-                    try:
-                        key, value = self.__ParseHeaders(line)
-                        self.__headers[key] = value
-                    except ValueError:
-                        pass
+                    if line.lower().startswith("content-type") or line.lower().startswith("\t"):
+                        ctype += line.strip() # collect all the content-type into a single line
+                    else:
+                        try:
+                            key, value = self.__HeadersToKV(line)
+                            self.__headers[key] = value
+                        except ValueError:
+                            pass
 
             # parse the content-type
             try:
-                key, value = self.__ParseHeaders(ctype)
+                key, value = self.__HeadersToKV(ctype)
                 self.__headers[key] = value
             except ValueError:
                 pass
+
         else:
             raise RuntimeError("Invalid .eml file supplied.")
 
-        # check if from, to, and subject headers exist
-        if not set(["From", "To", "Subject"]).issubset(self.__headers.keys()):
+        # check if headers are empty
+        if len(self.__headers.keys()) == 0:
             raise RuntimeError("Invalid .eml file supplied.")
 
         # set the file name in the class
