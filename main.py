@@ -1,8 +1,23 @@
 from EmlES import EmlES
+import os
+import time
 
-try:
-    asdf = EmlES()
-    asdf.Run("./data/0a0b6e855d85c7d069d89f3db07384df.eml")
-    print(asdf)
-except RuntimeError as e:
-    print(f"ERROR: {e}")
+start = time.time()
+
+dir = "./data"
+num = 0
+
+for file in os.listdir(dir):
+    try:
+        eml = EmlES()
+        eml.Run(f"{dir}/{file}")
+        num += 1
+    except RuntimeError as e:
+        print(f"ERROR: {e} on file {file}")
+
+print(f"Elapsed over {num} files: {(time.time() - start)} seconds")
+
+# file with invalid bytes
+#eml = EmlES()
+#eml.Run("./data/1eb99ffccafed8b65200d701dcaffe7a.eml")
+#print(eml)
