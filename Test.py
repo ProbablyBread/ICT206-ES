@@ -9,8 +9,7 @@ num = 0
 
 for file in os.listdir(dir):
     try:
-        eml = EmlES()
-        eml.Run(f"{dir}/{file}")
+        eml = EmlES(f"{dir}/{file}")
 
         #print("========")
         #print(eml)
@@ -23,6 +22,5 @@ for file in os.listdir(dir):
 print(f"Elapsed over {num} files: {(time.time() - start)} seconds")
 
 # file with invalid bytes
-#eml = EmlES()
-#eml.Run("./data/1eb99ffccafed8b65200d701dcaffe7a.eml")
+#eml = EmlES("./data/1eb99ffccafed8b65200d701dcaffe7a.eml")
 #print(eml)

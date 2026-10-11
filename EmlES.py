@@ -2,11 +2,14 @@ import os
 import re
 
 class EmlES:
-    def __init__(self):
-        self.__confidence: float = 0.0 # confidence rating
+    def __init__(self, filePath):
+        self.__confidence: float = 0.0 # confidence rating, this will come later
         self.__emlFile: str = "None" # path to .eml file
         self.__headers: dict[str] = {} # eml file headers
         self.__content: str = "None" # eml file content
+
+        # parsing
+        self.__ParseEmlHeaders(filePath) # immediately parse the input file
 
     def __eq__(self, other):
         if not self.__class__ is other.__class__:
@@ -21,9 +24,6 @@ Content: {self.__content}
 File Path: {self.__emlFile}
 Confidence: {self.__confidence}
 """
-
-    def Run(self, filePath):
-        self.__ParseEmlHeaders(filePath)
 
     def __HeadersToKV(self, headerString):
         if re.match(r"^[A-Za-z-]+:\s?.*$", headerString):
