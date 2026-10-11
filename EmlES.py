@@ -6,6 +6,7 @@ class EmlES:
         self.__confidence: float = 0.0 # confidence rating
         self.__emlFile: str = "None" # path to .eml file
         self.__headers: dict[str] = {} # eml file headers
+        self.__content: str = "None" # eml file content
 
     def __eq__(self, other):
         if not self.__class__ is other.__class__:
@@ -13,8 +14,10 @@ class EmlES:
         else:
             return self.__emlFile == other.__emlFile
 
+    # change this to eventually only print what the user wants to see
     def __str__(self):
         return f"""Headers: {self.__headers}
+Content: {self.__content}
 File Path: {self.__emlFile}
 Confidence: {self.__confidence}
 """
@@ -30,7 +33,7 @@ Confidence: {self.__confidence}
             raise ValueError("Invalid header string format")
 
     def __ParseEmlHeaders(self, filePath):
-        if os.path.isfile(filePath) and os.path.exists(filePath) and filePath.endswith(".eml"):
+        if filePath.endswith(".eml") and os.path.isfile(filePath):
             ctype = "" # store content type string
 
             with open(filePath, 'r', errors="ignore") as eml:
@@ -49,6 +52,9 @@ Confidence: {self.__confidence}
                             self.__headers[key] = value
                         except ValueError:
                             pass
+
+                # read the remaining lines as content
+                self.__content = eml.read()
 
             # parse the content-type
             try:

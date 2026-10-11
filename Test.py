@@ -11,6 +11,11 @@ for file in os.listdir(dir):
     try:
         eml = EmlES()
         eml.Run(f"{dir}/{file}")
+
+        #print("========")
+        #print(eml)
+        #print("========\n\n")
+        
         num += 1
     except RuntimeError as e:
         print(f"ERROR: {e} on file {file}")
