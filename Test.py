@@ -1,4 +1,15 @@
-from EmlES import EmlES
+try:
+    from EmlES import EmlES
+except FileNotFoundError as e:
+    print(f"FileNotFoundError: {e}")
+    exit(1)
+except SyntaxError as e:
+    print(f"SyntaxError: {e}")
+    exit(1)
+except Exception as e:
+    print(f"Unhandled exception caught: {e}")
+    exit(1)
+
 import os
 import time
 
@@ -17,7 +28,9 @@ for file in os.listdir(dir):
         
         num += 1
     except RuntimeError as e:
-        print(f"ERROR: {e} on file {file}")
+        print(f"RuntimeError: {e}")
+    except Exception as e:
+        print(f"Unhandled exception caught: {e}")
 
 print(f"Elapsed over {num} files: {(time.time() - start)} seconds")
 

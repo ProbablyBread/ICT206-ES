@@ -1,7 +1,12 @@
+from RuleEngine import RuleEngine
+
 import os
 import re
 
 class EmlES:
+    # init static rule engine
+    __ruleEngine = RuleEngine()
+
     def __init__(self, filePath):
         self.__confidence: float = 0.0 # confidence rating, this will come later
         self.__emlFile: str = "None" # path to .eml file
@@ -30,7 +35,7 @@ Confidence: {self.__confidence}
             parts = headerString.split(":", 1)
             return parts[0], parts[1].strip()
         else:
-            raise ValueError("Invalid header string format")
+            raise ValueError
 
     def __ParseEmlHeaders(self, filePath):
         if filePath.endswith(".eml") and os.path.isfile(filePath):
