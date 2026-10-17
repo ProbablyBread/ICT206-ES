@@ -16,8 +16,8 @@ class EmlES:
         self.__emlFile: str = "None" # path to .eml file
         self.__headers: EmailMessage = None # eml file headers
 
-        # parsing
-        self.__ParseEmlHeaders(filePath) # immediately parse the input file
+        # parse the input file
+        self.__ParseEmlHeaders(filePath)
 
         # run rules
         self.__confidence, self.__reasoning = self.__ruleEngine.Run(self.__headers)

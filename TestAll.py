@@ -32,9 +32,6 @@ for file in os.listdir(dir):
     except Exception as e:
         print(f"Unhandled exception caught: {e}")
 
-    #if eml.confidence == 1:
-        #print(f"{file}: {eml.reasoning}")
-
 print(f"Elapsed over {num} files: {(time.time() - start)} seconds")
 
 #eml = EmlES("./data/f0d0670b349aed344442f99f0c1a0c48.eml")

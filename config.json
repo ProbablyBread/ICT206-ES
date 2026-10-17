@@ -1,6 +1,32 @@
 {
-    "overrides": ["test@domain.com", "domain.com", "domain.com"],
+    "overrides": ["test@domain.com", "domain.com", "domain.com", "asdf"],
     "rules": {
-        "1": [""]
+        "1": {
+            "confidence": 1.0,
+            "rule": "MAIL-FROM != FROM"
+        },
+        "2": {
+            "confidence": 1.0,
+            "rule": "COUNT(FROM) > 1"
+        },
+        "3": {
+            "confidence": 1.0,
+            "rule": "FROM == NULL"
+        },
+        "4": {
+            "confidence": 1.0,
+            "rule": "MAIL-FROM == NULL"
+        },
+        "5": {
+            "confidence": 0.7,
+            "rule": "REPLY-TO != FROM"
+        },
+        "6": {
+            "confidence": 0.5,
+            "rule": "RETURN-PATH != FROM"
+        },
+        "7": {
+            "rule": "asdf"
+        }
     }
 }
