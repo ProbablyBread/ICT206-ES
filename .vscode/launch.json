@@ -5,10 +5,17 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "name": "Debug Run with Test.py",
+            "name": "Debug Run with TestAll.py",
             "type": "debugpy",
             "request": "launch",
-            "program": "${workspaceFolder}/Test.py",
+            "program": "${workspaceFolder}/TestAll.py",
+            "console": "integratedTerminal"
+        },
+        {
+            "name": "Debug Run with TestRuleEngine.py",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "${workspaceFolder}/TestRuleEngine.py",
             "console": "integratedTerminal"
         }
     ]

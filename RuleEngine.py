@@ -1,21 +1,30 @@
 import os
+import json
+import re
 
 class RuleEngine:
     def __init__(self):
-        self.__ruleFile: str = f"{os.path.dirname(__file__)}/config.ini"
-        self.__ruleDict: dict[str] = {}
-        self.__ruleOverrides: dict[str] = {}
+        self.__ruleFile: str = f"{os.path.dirname(__file__)}/config.json"
+        self.__ruleList: list[str] = []
+        self.__overrideList: list[str] = []
 
         if not os.path.exists(self.__ruleFile):
-            raise FileNotFoundError("config.ini not found.")
+            raise FileNotFoundError("config.json not found.")
 
-        if not self.__VerifyRules():
-            raise SyntaxError("Invalid config.ini supplied.")
+        self.__LoadRules()
 
-        self.__ParseRules()
+    def __LoadRules(self):
+        try:
+            full_json = json.load(open(self.__ruleFile, "r"))
+        except:
+            raise RuntimeError("Invalid config.json supplied.")
 
-    def __VerifyRules(self):
-        pass
+        for override in set(full_json["overrides"]):
+            # check if it's a valid email address or domain
+            if not re.match(r"(\w+@)?\w+(\.\w+){1,}", override):
+                raise ValueError(f"Invalid domain or email address in overrides - {override}.")
 
-    def __ParseRules(self):
-        pass
+        self.__overrideList = list(set(full_json["overrides"]))
+
+        for rule in set(full_json["rules"]):
+            print(rule)
