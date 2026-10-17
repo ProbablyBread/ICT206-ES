@@ -20,7 +20,7 @@ num = 0
 
 for file in os.listdir(dir):
     try:
-        eml = EmlES(f"{dir}/{file}")
+        #eml = EmlES(f"{dir}/{file}")
 
         #print("========")
         #print(eml)
@@ -32,8 +32,11 @@ for file in os.listdir(dir):
     except Exception as e:
         print(f"Unhandled exception caught: {e}")
 
+    #if eml.confidence == 1:
+        #print(f"{file}: {eml.reasoning}")
+
 print(f"Elapsed over {num} files: {(time.time() - start)} seconds")
 
-# file with invalid bytes
-#eml = EmlES("./data/1eb99ffccafed8b65200d701dcaffe7a.eml")
-#print(eml)
+#eml = EmlES("./data/f0d0670b349aed344442f99f0c1a0c48.eml")
+eml = EmlES("./data/f0b9ecc6869b31b80acccee9db0e2eb8.eml")
+print(eml.headers)

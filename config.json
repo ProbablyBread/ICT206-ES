@@ -1,0 +1,6 @@
+{
+    "overrides": ["test@domain.com", "domain.com", "domain.com"],
+    "rules": {
+        "1": [""]
+    }
+}
