@@ -1,3 +1,6 @@
 from RuleEngine import RuleEngine
 
-r = RuleEngine()
+try:
+    r = RuleEngine()
+except Exception as e:
+    print(e)

@@ -16,6 +16,9 @@ class EmlES:
         # parsing
         self.__ParseEmlHeaders(filePath) # immediately parse the input file
 
+        # run rules
+        self.__confidence = self.__ruleEngine.Run(self.__headers)
+
     def __eq__(self, other):
         if not self.__class__ is other.__class__:
             return NotImplemented

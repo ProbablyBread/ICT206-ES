@@ -1,0 +1,3 @@
+{
+    "overrides": ["test@domain.com", "domain.com", "domain.com"]
+}
