@@ -1,5 +1,5 @@
 {
-    "overrides": ["test@domain.com", "domain.com", "domain.com", "asdf"],
+    "overrides": ["test@domain.com", "domain.com", "domain.com"],
     "rules": {
         "1": {
             "confidence": 1.0,
@@ -24,9 +24,6 @@
         "6": {
             "confidence": 0.5,
             "rule": "RETURN-PATH != FROM"
-        },
-        "7": {
-            "rule": "asdf"
         }
     }
 }

@@ -28,7 +28,20 @@ class RuleEngine:
                 self.__overrideList += override
 
     def __VerifyRule(self, rule):
-        # write something here to verify the syntax of rules
+        split = rule.strip().split(" ")
+
+        # too many variables
+        if len(split) != 3:
+            return False
+
+        # invalid operands
+        if split[1] not in ["==", "<", "<=", ">", ">=", "!="]:
+            return False
+
+        # rhs is not a number if using COUNT()
+        if re.match(r"COUNT\(.*\)", split[0]) and not re.match(r"\d+", split[2]):
+            return False
+
         return True
 
     def __LoadRules(self):
@@ -45,8 +58,16 @@ class RuleEngine:
             elif not self.__VerifyRule(rule["rule"]):
                 print(f"Skipping malformed rule {r} in config.json rules - {rule}")
             else:
-                self.__ruleDict[r] = rule
+                split = rule["rule"].split(" ")
+
+                tempDict = {
+                    "lhs": split[0],
+                    "op": split[1],
+                    "rhs": split[2],
+                    "confidence": rule["confidence"]
+                }
+
+                self.__ruleDict[r] = tempDict
 
     def Run(self, headers):
-        new_dict = {"test": 0.1}
-        return 0.1, new_dict
+        pass 
