@@ -7,21 +7,17 @@
         },
         "2": {
             "confidence": 1.0,
-            "rule": "COUNT(FROM) > 1"
+            "rule": "FROM == NULL"
         },
         "3": {
             "confidence": 1.0,
-            "rule": "FROM == NULL"
-        },
-        "4": {
-            "confidence": 1.0,
             "rule": "MAIL-FROM == NULL"
         },
-        "5": {
+        "4": {
             "confidence": 0.7,
             "rule": "REPLY-TO != FROM"
         },
-        "6": {
+        "5": {
             "confidence": 0.5,
             "rule": "RETURN-PATH != FROM"
         }

@@ -17,7 +17,7 @@ class EmlES:
         self.__ParseEmlHeaders(filePath)
 
         # run rules
-        #self.__confidence, self.__reasoning = self.__ruleEngine.Run(self.__headers)
+        self.__confidence, self.__reasoning = self.__ruleEngine.Run(self.__headers)
 
     @property
     def confidence(self):
@@ -70,7 +70,10 @@ Reasoning: {self.__reasoning}
         value = None
 
         for line in lines:
-            split = line.strip().split(":", 1) # split only once
+            if not re.match(r"^\s+.*$", line):
+                split = line.strip().split(":", 1) # split only once
+            else:
+                split = []
 
             if len(split) > 1:
                 key = split[0].upper()
@@ -88,8 +91,7 @@ Reasoning: {self.__reasoning}
                 if key is None and re.match(r"^From\s.*$", split[0]):
                     pass # ignore and do not add
                 else:
-                    self.__headers[key] = value # reuse the previous key since it wasn't updated
-
+                    self.__headers[key] += f" {line.strip()}" # reuse the previous key since it wasn't updated
 
         if len (self.__headers.keys()) == 0:
             raise ValueError(f"Unable to parse input .eml file due to invalid headers.")
