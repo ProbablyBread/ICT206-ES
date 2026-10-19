@@ -1,9 +1,10 @@
 {
-    "overrides": ["test@domain.com", "domain.com", "domain.com"],
+    "senderOverrides": ["test@domain.com", "domain.com", "domain.com"],
+    "destinationOverrides": ["test@domain.com", "domain.com"],
     "rules": {
         "1": {
             "confidence": 1.0,
-            "rule": "MAIL-FROM != FROM"
+            "rule": "SENDER != FROM"
         },
         "2": {
             "confidence": 1.0,
@@ -11,7 +12,7 @@
         },
         "3": {
             "confidence": 1.0,
-            "rule": "MAIL-FROM == NULL"
+            "rule": "SENDER == NULL"
         },
         "4": {
             "confidence": 0.7,
@@ -20,6 +21,10 @@
         "5": {
             "confidence": 0.5,
             "rule": "RETURN-PATH != FROM"
+        },
+        "6": {
+            "confidence": 1.0,
+            "rule": "COUNT(FROM) > 1"
         }
     }
 }

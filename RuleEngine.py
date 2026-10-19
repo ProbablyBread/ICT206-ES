@@ -2,11 +2,19 @@ import os
 import json
 import re
 
+from email.message import EmailMessage
+
 class RuleEngine:
+    __ORIGINATOR_HEADERS = ["FROM", "REPLY-TO", "SENDER"]
+    __DESTINATION_HEADERS = ["TO", "CC", "BCC"]
+
     def __init__(self):
         self.__ruleFile: str = f"{os.path.dirname(__file__)}/config.json"
         self.__ruleDict: dict[str] = {}
-        self.__overrideList: list[str] = []
+        self.__senderOverrideDomains: list[str] = []
+        self.__senderOverrideEmails: list[str] = []
+        self.__destinationOverrideDomains: list[str] = []
+        self.__destinationOverrideEmails: list[str] = []
 
         if not os.path.exists(self.__ruleFile):
             raise FileNotFoundError("config.json not found.")
@@ -14,18 +22,37 @@ class RuleEngine:
         self.__LoadOverrides()
         self.__LoadRules()
 
+        print(self.__ruleDict)
+
     def __LoadOverrides(self):
         try:
             full_json = json.load(open(self.__ruleFile, "r"))
         except:
             raise RuntimeError("Invalid config.json supplied.")
 
-        for override in set(full_json["overrides"]):
-            # check if it's a valid email address or domain
-            if not re.match(r"(\w+@)?\w+(\.\w+){1,4}", override):
-                print(f"Skipping invalid domain or email address in config.json overrides - {override}.")
+        # load sender overrides
+        for override in set(full_json["senderOverrides"]):
+            if re.match(r"^\w+@\w+(\.\w+){1,}$", override):
+                self.__senderOverrideEmails.append(override)
+            elif re.match(r"^\w+(\.\w+){1,}$", override):
+                self.__senderOverrideDomains.append(override)
             else:
-                self.__overrideList += override
+                print(f"Skipping invalid email/domain of {override} in senderOverrides in config.json.")
+
+        # load destination overrides
+        for override in set(full_json["destinationOverrides"]):
+            if re.match(r"^\w+@\w+(\.\w+){1,}$", override):
+                self.__destinationOverrideEmails.append(override)
+            elif re.match(r"^\w+(\.\w+){1,}$", override):
+                self.__destinationOverrideDomains.append(override)
+            else:
+                print(f"Skipping invalid email/domain of {override} in senderOverrides in config.json.")
+
+        # deduplicate all lists
+        self.__senderOverrideEmails = list(set(self.__senderOverrideEmails))
+        self.__senderOverrideDomains = list(set(self.__senderOverrideDomains))
+        self.__destinationOverrideEmails = list(set(self.__destinationOverrideEmails))
+        self.__destinationOverrideDomains = list(set(self.__destinationOverrideDomains))
 
     def __VerifyRule(self, split):
         # too many variables
@@ -36,8 +63,8 @@ class RuleEngine:
         if split[1] not in ["==", "<", "<=", ">", ">=", "!="]:
             return False
 
-        # rhs is not a number if using COUNT()
-        if re.match(r"COUNT\(.*\)", split[0]) and not re.match(r"\d+", split[2]):
+        # invalid count rule type
+        if re.match(r"^COUNT\(.*\)", split[0]) and not re.match(r"\d+", split[2]):
             return False
 
         return True
@@ -65,7 +92,11 @@ class RuleEngine:
                 op = split[1]
                 rhs = split[2]
 
-                if re.match(r"^NULL$", split[0].upper()):
+                if re.match(r"^COUNT\(.*\)", split[0].upper()):
+                    matchObj = re.findall(r"^COUNT\((\w+)\)", split[0].upper())
+                    ruleType = "count"
+                    lhs = matchObj[0]
+                elif re.match(r"^NULL$", split[0].upper()):
                     ruleType = "null"
                     lhs = ""
                 elif re.match(r"^NULL$", split[2].upper()):
@@ -102,46 +133,11 @@ class RuleEngine:
     def __CmpNotEquals(self, lhs, rhs):
         return lhs != rhs
 
-    def Run(self, headers):
-        confidence: float = 0.0
+    def Run(self, headers: EmailMessage):
+        confidence = 0.0
         reasoning = {}
 
-        # handle any invalid headers first
-        # if multiple of the same originator headers, immediately mark as malicious
-        for header in headers:
-            if confidence >= 1.0:
-                confidence = 1.0 # suppress confidence to max 1.0
-                return confidence, reasoning 
-
-            if header is None or header == "" or not re.match(r"^[A-Z-]+$", header):
-                confidence += 0.2
-                reasoning["20000"] = f"Malformed header detected. (+{confidence})"
-
-            if header in ["FROM", "SENDER", "REPLY-TO"] and type(headers[header]) is list and len(headers[header]) > 1:
-                confidence = 1.0
-                reasoning["20001"] = f"Multiple FROM headers detected. (+{confidence})"
-
-        for rule in self.__ruleDict:
-            if confidence >= 1.0:
-                confidence = 1.0 # suppress confidence to max 1.0
-                return confidence, reasoning
-
-            lhs = self.__ruleDict[rule]["lhs"]
-            rhs = self.__ruleDict[rule]["rhs"]
-            op = self.__ruleDict[rule]["op"]
-            ruleType = self.__ruleDict[rule]["type"]
-
-            # skip processing for all rules if the header is not found at all
-            if ruleType == "normal":
-                if lhs not in headers.keys() or rhs not in headers.keys():
-                    continue
-            elif ruleType == "null" and lhs == "":
-                if rhs not in headers.keys():
-                    continue
-            elif ruleType == "null" and rhs == "":
-                if lhs not in headers.keys():
-                    continue
-            else:
-                raise RuntimeError("You should never hit this error message!")
+        if headers.defects > 0:
+            confidence += len(headers.defects) * 0.2
 
         return confidence, reasoning

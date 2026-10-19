@@ -1,7 +1,10 @@
 from RuleEngine import RuleEngine
 
+from email.parser import BytesFeedParser
+from email.message import EmailMessage
+from email import policy
+
 import os
-import re
 
 class EmlES:
     # init static rule engine
@@ -11,7 +14,7 @@ class EmlES:
         self.__confidence: float = 0.0 # confidence rating
         self.__reasoning: dict[str] = {} # dict of rule hits 
         self.__emlFile: str = "None" # path to .eml file
-        self.__headers: dict[str] = {} # eml file headers
+        self.__headers: EmailMessage = None # eml file headers
 
         # parse the input file
         self.__ParseEmlHeaders(filePath)
@@ -50,48 +53,16 @@ Reasoning: {self.__reasoning}
 """
 
     def __ParseEmlHeaders(self, filePath):
-        if not os.path.exists(filePath) or not filePath.endswith(".eml"):
+        if not os.path.exists(filePath):
             raise ValueError(f"Invalid file provided.")
 
+        parser = BytesFeedParser(policy=policy.default)
+
         with open(filePath, 'rb') as emlFile:
-            lines = []
+            for line in emlFile:
+                parser.feed(line)
 
-            while True:
-                line = emlFile.readline().decode()
+        self.__headers = parser.close()
 
-                # read only the headers
-                if line == "\n" or line == "\r\n" or line == "":
-                    break
-
-                lines.append(line)
-
-        self.__emlFile = filePath
-        key = None
-        value = None
-
-        for line in lines:
-            if not re.match(r"^\s+.*$", line):
-                split = line.strip().split(":", 1) # split only once
-            else:
-                split = []
-
-            if len(split) > 1:
-                key = split[0].upper()
-                value = split[1]
-
-                if key not in self.__headers.keys():
-                    self.__headers[key] = value.strip()
-                else:
-                    if type(self.__headers[key]) is not list:
-                        self.__headers[key] = [self.__headers[key]]
-
-                    self.__headers[key].append(value.strip())
-            else:
-                # detect unix mbox from header as the first line
-                if key is None and re.match(r"^From\s.*$", split[0]):
-                    pass # ignore and do not add
-                else:
-                    self.__headers[key] += f" {line.strip()}" # reuse the previous key since it wasn't updated
-
-        if len (self.__headers.keys()) == 0:
-            raise ValueError(f"Unable to parse input .eml file due to invalid headers.")
+        if len(self.__headers.keys()) == 0:
+            raise RuntimeError(f"Unable to parse input .eml file due to malformed headers.")
