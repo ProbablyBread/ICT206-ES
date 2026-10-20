@@ -140,7 +140,7 @@ class RuleEngine:
 
             # check each rule type, if headers are missing, skip the rule
             if rule["type"] == "normal":
-                if [rule["lhs"], rule["rhs"]] not in headers.keys():
+                if rule["lhs"] not in headers.keys() or rule["rhs"] not in headers.keys():
                     continue
             elif rule["type"] == "count":
                 if rule["lhs"] not in headers.keys():
