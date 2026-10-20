@@ -39,7 +39,7 @@ class EmlES:
         return self.__emlFile
 
     def __eq__(self, other):
-        if not self.__class__ is other.__class__:
+        if not type(self) is type(other):
             return NotImplemented
         else:
             return self.__emlFile == other.__emlFile
