@@ -20,7 +20,7 @@ class EmlES:
         self.__ParseEmlHeaders(filePath)
 
         # run rules
-        self.__confidence, self.__reasoning = self.__ruleEngine.Run(self.__headers)
+        self.__confidence, self.__reasoning = self.__ruleEngine.Process(self.__headers)
 
     @property
     def confidence(self):
@@ -66,3 +66,6 @@ Reasoning: {self.__reasoning}
 
         if len(self.__headers.keys()) == 0:
             raise RuntimeError(f"Unable to parse input .eml file due to malformed headers.")
+            
+        # TODO: check if originator or destination headers here are encoded
+        # TODO: if they are, decode them appropriately before proceeding

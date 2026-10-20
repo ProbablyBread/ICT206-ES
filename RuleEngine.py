@@ -115,29 +115,50 @@ class RuleEngine:
 
                 self.__ruleDict[r] = tempDict
 
-    def __CmpEquals(self, lhs, rhs):
-        return lhs == rhs
+    def __Compare(self, lhs, op, rhs):
+        match op:
+            case "==": return lhs == rhs
+            case "<": return lhs < rhs
+            case "<=": return lhs <= rhs
+            case ">": return lhs > rhs
+            case ">=": return lhs >= rhs
+            case "!=": return lhs != rhs
+            case _: raise ValueError("Invalid comparison operator") # this should technically never happen
 
-    def __CmpLessThan(self, lhs, rhs):
-        return lhs < rhs
-
-    def __CmpLessEquals(self, lhs, rhs):
-        return lhs <= rhs
-
-    def __CmpMoreThan(self, lhs, rhs):
-        return lhs > rhs
-
-    def __CmpMoreEquals(self, lhs, rhs):
-        return lhs >= rhs
-
-    def __CmpNotEquals(self, lhs, rhs):
-        return lhs != rhs
-
-    def Run(self, headers: EmailMessage):
+    def Process(self, headers: EmailMessage):
         confidence = 0.0
         reasoning = {}
 
         if headers.defects > 0:
             confidence += len(headers.defects) * 0.2
+
+        for rule in self.__ruleDict:
+            if confidence >= 1.0:
+                break
+
+            rule = self.__ruleDict[rule]
+
+            # check each rule type, if headers are missing, skip the rule
+            if rule["type"] == "normal":
+                if [rule["lhs"], rule["rhs"]] not in headers.keys():
+                    continue
+            elif rule["type"] == "count":
+                if rule["lhs"] not in headers.keys():
+                    continue
+            elif rule["type"] == "null":
+                if rule["lhs"] == "null" and rule["rhs"] not in headers.keys():
+                    continue
+                elif rule["rhs"] == "null" and rule["lhs"] not in headers.keys():
+                    continue
+            else:
+                # this should technically never happen
+                raise RuntimeError("Invalid rule supplied.")
+
+            if self.__Compare(rule["lhs"], rule["op"], rule["rhs"]):
+                confidence += rule["confidence"]
+                reasoning[rule] = f"{rule["lhs"]} {rule["op"]} {rule["rhs"]} (+ {rule["confidence"]})"
+
+        if confidence > 1.0:
+            confidence = 1.0 # clamp to 1.0
 
         return confidence, reasoning
