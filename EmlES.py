@@ -5,22 +5,27 @@ from email.message import EmailMessage
 from email import policy
 
 import os
+import re
 
 class EmlES:
+    __ORIGINATOR_HEADERS = ["FROM", "REPLY-TO", "SENDER"]
+    __DESTINATION_HEADERS = ["TO", "CC", "BCC"]
+
     # init static rule engine
     __ruleEngine = RuleEngine()
 
     def __init__(self, filePath):
         self.__confidence: float = 0.0 # confidence rating
-        self.__reasoning: dict[str] = {} # dict of rule hits 
+        self.__reasoning: dict[any][str] = {} # dict of rule hits 
         self.__emlFile: str = "None" # path to .eml file
         self.__headers: EmailMessage = None # eml file headers
 
         # parse the input file
         self.__ParseEmlHeaders(filePath)
 
-        # run rules
-        self.__confidence, self.__reasoning = self.__ruleEngine.Process(self.__headers)
+        # run rules if not already fully confident
+        if not self.__confidence >= 1.0:
+            self.__confidence, self.__reasoning = self.__ruleEngine.Process(self.__headers, self.__confidence, self.__reasoning)
 
     @property
     def confidence(self):
@@ -66,6 +71,27 @@ Reasoning: {self.__reasoning}
 
         if len(self.__headers.keys()) == 0:
             raise RuntimeError(f"Unable to parse input .eml file due to malformed headers.")
-            
-        # TODO: check if originator or destination headers here are encoded
-        # TODO: if they are, decode them appropriately before proceeding
+
+        emailRegex = re.compile(r"[A-Za-z0-9-_.]+@[A-Za-z0-9-]+\.(?:\.?[A-Za-z0-9-]+){1,}")
+
+        if len(self.__headers.defects) > 0:
+            confidence += len(self.__headers.defects) * 0.2
+
+        for header in self.__ORIGINATOR_HEADERS + self.__DESTINATION_HEADERS:
+            emails = self.__headers.get_all(header)
+
+            # extract email address only if header exists
+            if emails is not None:
+                for email in emails:
+                    matches = emailRegex.findall(email)
+
+                    if len(matches) > 0:
+                        self.__headers.replace_header(header, matches)
+                    else:
+                        # if any address in the list cannot be parsed for any reason
+                        self.__confidence += 0.8
+                        self.__reasoning["0"] = f"Detected invalid email address of {email} in the {header} header."
+
+                        if self.__confidence >= 1.0:
+                            self.__confidence = 1.0
+                            break

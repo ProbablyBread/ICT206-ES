@@ -5,12 +5,9 @@ import re
 from email.message import EmailMessage
 
 class RuleEngine:
-    __ORIGINATOR_HEADERS = ["FROM", "REPLY-TO", "SENDER"]
-    __DESTINATION_HEADERS = ["TO", "CC", "BCC"]
-
     def __init__(self):
         self.__ruleFile: str = f"{os.path.dirname(__file__)}/config.json"
-        self.__ruleDict: dict[str] = {}
+        self.__ruleDict: dict[any][str] = {}
         self.__senderOverrideDomains: list[str] = []
         self.__senderOverrideEmails: list[str] = []
         self.__destinationOverrideDomains: list[str] = []
@@ -21,8 +18,6 @@ class RuleEngine:
 
         self.__LoadOverrides()
         self.__LoadRules()
-
-        print(self.__ruleDict)
 
     def __LoadOverrides(self):
         try:
@@ -125,13 +120,7 @@ class RuleEngine:
             case "!=": return lhs != rhs
             case _: raise ValueError("Invalid comparison operator") # this should technically never happen
 
-    def Process(self, headers: EmailMessage):
-        confidence = 0.0
-        reasoning = {}
-
-        if headers.defects > 0:
-            confidence += len(headers.defects) * 0.2
-
+    def Process(self, headers: EmailMessage, confidence: float, reasoning: dict[any][str]):
         for rule in self.__ruleDict:
             if confidence >= 1.0:
                 break
