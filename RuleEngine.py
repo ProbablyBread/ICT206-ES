@@ -5,6 +5,8 @@ import re
 from email.message import EmailMessage
 
 class RuleEngine:
+    __ORIGINATOR_HEADERS = ["FROM", "REPLY-TO", "SENDER"]
+
     def __init__(self):
         self.__ruleFile: str = f"{os.path.dirname(__file__)}/config.json"
         self.__ruleDict: dict[any][str] = {}
@@ -25,20 +27,23 @@ class RuleEngine:
         except:
             raise RuntimeError("Invalid config.json supplied.")
 
+        emailRegex = re.compile(r"^[A-Za-z0-9-_.]+@[A-Za-z0-9-]+\.(?:\.?[A-Za-z0-9-]+){1,}$")
+        domainRegex = re.compile(r"^[A-Za-z0-9-]+\.(?:\.?[A-Za-z0-9-]+){1,}$") 
+
         # load sender overrides
         for override in set(full_json["senderOverrides"]):
-            if re.match(r"^\w+@\w+(\.\w+){1,}$", override):
+            if emailRegex.match(override):
                 self.__senderOverrideEmails.append(override)
-            elif re.match(r"^\w+(\.\w+){1,}$", override):
+            elif domainRegex.match(override):
                 self.__senderOverrideDomains.append(override)
             else:
                 print(f"Skipping invalid email/domain of {override} in senderOverrides in config.json.")
 
         # load destination overrides
         for override in set(full_json["destinationOverrides"]):
-            if re.match(r"^\w+@\w+(\.\w+){1,}$", override):
+            if emailRegex.match(override):
                 self.__destinationOverrideEmails.append(override)
-            elif re.match(r"^\w+(\.\w+){1,}$", override):
+            elif domainRegex.match(override):
                 self.__destinationOverrideDomains.append(override)
             else:
                 print(f"Skipping invalid email/domain of {override} in senderOverrides in config.json.")
