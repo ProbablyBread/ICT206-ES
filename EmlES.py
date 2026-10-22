@@ -75,7 +75,8 @@ Reasoning: {self.__reasoning}
         emailRegex = re.compile(r"[A-Za-z0-9-_.]+@[A-Za-z0-9-]+\.(?:\.?[A-Za-z0-9-]+){1,}")
 
         if len(self.__headers.defects) > 0:
-            confidence += len(self.__headers.defects) * 0.2
+            self.__confidence += len(self.__headers.defects) * 0.2
+            self.__reasoning["1000"] = f"{len(self.__headers.defects)} malformed headers detected. (+{self.__confidence})"
 
         for header in self.__ORIGINATOR_HEADERS + self.__DESTINATION_HEADERS:
             emails = self.__headers.get_all(header)
@@ -90,7 +91,7 @@ Reasoning: {self.__reasoning}
                     else:
                         # if any address in the list cannot be parsed for any reason
                         self.__confidence += 0.8
-                        self.__reasoning["0"] = f"Detected invalid email address of {email} in the {header} header."
+                        self.__reasoning["1001"] = f"Invalid email address of {email} in the {header} header. (+0.8)"
 
                         if self.__confidence >= 1.0:
                             self.__confidence = 1.0

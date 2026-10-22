@@ -145,7 +145,7 @@ class RuleEngine:
 
             if self.__Compare(rule["lhs"], rule["op"], rule["rhs"]):
                 confidence += rule["confidence"]
-                reasoning[rule] = f"{rule["lhs"]} {rule["op"]} {rule["rhs"]} (+ {rule["confidence"]})"
+                reasoning[rule] = f"{rule["lhs"]} {rule["op"]} {rule["rhs"]} (+{rule["confidence"]})"
 
         if confidence > 1.0:
             confidence = 1.0 # clamp to 1.0
