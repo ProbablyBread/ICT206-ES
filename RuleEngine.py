@@ -6,6 +6,7 @@ from email.message import EmailMessage
 
 class RuleEngine:
     __ORIGINATOR_HEADERS = ["FROM", "REPLY-TO", "SENDER"]
+    __DESTINATION_HEADERS = ["TO", "CC", "BCC"]
 
     def __init__(self):
         self.__ruleFile: str = f"{os.path.dirname(__file__)}/config.json"
@@ -78,7 +79,7 @@ class RuleEngine:
         for r in full_json["rules"]:
             rule = full_json["rules"][r]
 
-            if "confidence" not in rule.keys() or "rule" not in rule.keys():
+            if "confidence" not in rule.keys() or "rule" not in rule.keys() or "description" not in rule.keys():
                 print(f"Skipping rule {r} with invalid properties in config.json rules - {rule}")
             else:
                 split = rule["rule"].split(" ")
@@ -110,7 +111,8 @@ class RuleEngine:
                     "op": op,
                     "rhs": rhs,
                     "confidence": rule["confidence"],
-                    "type": ruleType
+                    "type": ruleType,
+                    "description": rule["description"]
                 }
 
                 self.__ruleDict[r] = tempDict
@@ -128,21 +130,23 @@ class RuleEngine:
     def Process(self, headers: EmailMessage, confidence: float, reasoning: dict[any][str]):
         for rule in self.__ruleDict:
             if confidence >= 1.0:
+                confidence = 1.0
                 break
 
+            ruleNum = rule
             rule = self.__ruleDict[rule]
 
             # check each rule type, if headers are missing, skip the rule
             if rule["type"] == "normal":
-                if rule["lhs"] not in headers.keys() or rule["rhs"] not in headers.keys():
+                if rule["lhs"] not in [h.upper() for h in headers.keys()] or rule["rhs"] not in [h.upper() for h in headers.keys()]:
                     continue
             elif rule["type"] == "count":
-                if rule["lhs"] not in headers.keys():
+                if rule["lhs"] not in [h.upper() for h in headers.keys()]:
                     continue
             elif rule["type"] == "null":
-                if rule["lhs"] == "null" and rule["rhs"] not in headers.keys():
+                if rule["lhs"] == "null" and rule["rhs"] not in [h.upper() for h in headers.keys()]:
                     continue
-                elif rule["rhs"] == "null" and rule["lhs"] not in headers.keys():
+                elif rule["rhs"] == "null" and rule["lhs"] not in [h.upper() for h in headers.keys()]:
                     continue
             else:
                 # this should technically never happen
@@ -150,9 +154,6 @@ class RuleEngine:
 
             if self.__Compare(rule["lhs"], rule["op"], rule["rhs"]):
                 confidence += rule["confidence"]
-                reasoning[rule] = f"{rule["lhs"]} {rule["op"]} {rule["rhs"]} (+{rule["confidence"]})"
-
-        if confidence > 1.0:
-            confidence = 1.0 # clamp to 1.0
+                reasoning[ruleNum] = f"{rule["description"]} (+{rule["confidence"]})"
 
         return confidence, reasoning

@@ -61,6 +61,8 @@ Reasoning: {self.__reasoning}
         if not os.path.exists(filePath):
             raise ValueError(f"Invalid file provided.")
 
+        self.__emlFile = filePath
+
         parser = BytesFeedParser(policy=policy.default)
 
         with open(filePath, 'rb') as emlFile:
@@ -76,7 +78,13 @@ Reasoning: {self.__reasoning}
 
         if len(self.__headers.defects) > 0:
             self.__confidence += len(self.__headers.defects) * 0.2
-            self.__reasoning["1000"] = f"{len(self.__headers.defects)} malformed headers detected. (+{self.__confidence})"
+
+            if len(self.__headers.defects) == 1:
+                string = "malformed header"
+            else:
+                string = "malformed headers"
+
+            self.__reasoning["1000"] = f"{len(self.__headers.defects)} {string} detected. (+{self.__confidence})"
 
         for header in self.__ORIGINATOR_HEADERS + self.__DESTINATION_HEADERS:
             emails = self.__headers.get_all(header)
@@ -90,8 +98,15 @@ Reasoning: {self.__reasoning}
                         self.__headers.replace_header(header, matches)
                     else:
                         # if any address in the list cannot be parsed for any reason
+                        if email == "" or email == None:
+                            email = "None"
+
                         self.__confidence += 0.8
-                        self.__reasoning["1001"] = f"Invalid email address of {email} in the {header} header. (+0.8)"
+
+                        if not "1001" in self.__reasoning.keys():
+                            self.__reasoning["1001"] = []
+
+                        self.__reasoning["1001"].append(f"Invalid email address of {email} in the {header} header. (+0.8)")
 
                         if self.__confidence >= 1.0:
                             self.__confidence = 1.0

@@ -4,27 +4,33 @@
     "rules": {
         "1": {
             "confidence": 1.0,
-            "rule": "SENDER != FROM"
+            "rule": "SENDER != FROM",
+            "description": "asdf"
         },
         "2": {
             "confidence": 1.0,
-            "rule": "FROM == NULL"
+            "rule": "FROM == NULL",
+            "description": "asdfasdf"
         },
         "3": {
             "confidence": 1.0,
-            "rule": "SENDER == NULL"
+            "rule": "SENDER == NULL",
+            "description": "asdfasdf"
         },
         "4": {
             "confidence": 0.7,
-            "rule": "REPLY-TO != FROM"
+            "rule": "REPLY-TO != FROM",
+            "description": "alskdjfkll"
         },
         "5": {
             "confidence": 0.5,
-            "rule": "RETURN-PATH != FROM"
+            "rule": "RETURN-PATH != FROM",
+            "description": "jaskldjfkljklasf"
         },
         "6": {
             "confidence": 1.0,
-            "rule": "COUNT(FROM) > 1"
+            "rule": "COUNT(FROM) > 1",
+            "description": "aklsdjflkasldf"
         }
     }
 }
