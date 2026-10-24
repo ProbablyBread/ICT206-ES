@@ -19,7 +19,6 @@ dir = "./data"
 parsed = 0
 errors = 0
 
-start = time.time()
 extremelyUnlikely = 0 
 veryUnlikely = 0
 likely = 0
@@ -45,9 +44,7 @@ for file in os.listdir(dir):
     except Exception:
         errors += 1
 
-end = time.time() - start
-
-print(f"Successfully parsed {parsed} files over {end:.2f} seconds.")
+print(f"Successfully parsed {parsed} files over {time.time() - start:.2f} seconds.")
 
 if errors > 0:
     print(f"Errors were encountered parsing {errors} file(s).\n")
@@ -75,7 +72,7 @@ if extremelyLikely > 0:
 print("\nSummary: ")
 
 if likelySummary > 0:
-    print(f"{likelySummary} email(s) were detected to be phishing emails ({likelySummary / parsed * 100:.2f}%)")
+    print(f"{likelySummary} email(s) were detected to be likely phishing ({likelySummary / parsed * 100:.2f}%)")
 
 if unlikelySummary > 0:
-    print(f"{unlikelySummary} email(s) were detected to be phishing emails ({unlikelySummary / parsed * 100:.2f}%)")
+    print(f"{unlikelySummary} email(s) were detected to be likely benign ({unlikelySummary / parsed * 100:.2f}%)")
