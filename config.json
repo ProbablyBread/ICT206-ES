@@ -2,33 +2,63 @@
     "rules": {
         "1": {
             "confidence": 1.0,
-            "rule": "SENDER != FROM",
-            "description": "asdf"
+            "rule": "FROM > 1",
+            "description": "The number of FROM headers exceeds 1.",
+            "ruleType": "count"
         },
         "2": {
             "confidence": 1.0,
-            "rule": "FROM == NULL",
-            "description": "asdfasdf"
+            "rule": "DATE > 1",
+            "description": "The number of DATE headers exceeds 1.",
+            "ruleType": "count"
         },
         "3": {
             "confidence": 1.0,
-            "rule": "SENDER == NULL",
-            "description": "asdfasdf"
+            "rule": "SUBJECT > 1",
+            "description": "The number of SUBJECT headers exceeds 1.",
+            "ruleType": "count"
         },
         "4": {
-            "confidence": 0.7,
-            "rule": "REPLY-TO != FROM",
-            "description": "alskdjfkll"
+            "confidence": 1.0,
+            "rule": "REPLY-TO > 1",
+            "description": "The number of REPLY-TO headers exceeds 1.",
+            "ruleType": "count"
         },
         "5": {
-            "confidence": 0.5,
-            "rule": "RETURN-PATH != FROM",
-            "description": "jaskldjfkljklasf"
+            "confidence": 1.0,
+            "rule": "SENDER > 1",
+            "description": "The number of SENDER headers exceeds 1.",
+            "ruleType": "count"
         },
         "6": {
-            "confidence": 1.0,
-            "rule": "COUNT(FROM) > 1",
-            "description": "aklsdjflkasldf"
+            "confidence": 0.6,
+            "rule": "FROM != SENDER",
+            "description": "The FROM header address does not match the SENDER header address.",
+            "ruleType": "header"
+        },
+        "7": {
+            "confidence": 0.6,
+            "rule": "FROM != REPLY-TO",
+            "description": "The FROM header address does not match the REPLY-TO header address.",
+            "ruleType": "header"
+        },
+        "8": {
+            "confidence": 0.6,
+            "rule": "SENDER != REPLY-TO",
+            "description": "The SENDER header address does not match the REPLY-TO header address.",
+            "ruleType": "header"
+        },
+        "9": {
+            "confidence": 0.4,
+            "rule": "MESSAGE-ID",
+            "description": "The MESSAGE-ID header is empty.",
+            "ruleType": "null"
+        },
+        "10": {
+            "confidence": 0.8,
+            "rule": "MESSAGE-ID != [A-Za-z0-9-_.]+@[A-Za-z0-9-]+\\.(?:\\.?[A-Za-z0-9-]+){1,}",
+            "description": "The MESSAGE-ID header does not match a valid address format.",
+            "ruleType": "regex"
         }
     }
 }

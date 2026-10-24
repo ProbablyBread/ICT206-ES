@@ -1,6 +1,7 @@
 import os
 import json
 import re
+import pprint
 
 from email.message import EmailMessage
 
@@ -14,12 +15,14 @@ class RuleEngine:
 
         self.__LoadRules()
 
+        pprint.PrettyPrinter(width=200).pprint(self.__ruleDict)
+
     def __VerifyRule(self, split, ruleType):
         # null rule type has too many variables
         if ruleType == "null" and len(split) != 1:
             return False
         # otherwise, it must be 3 variables
-        elif len(split) != 3:
+        elif ruleType != "null" and len(split) != 3:
             return False
 
         # check for valid ruleTypes
@@ -27,8 +30,9 @@ class RuleEngine:
             return False
 
         # invalid operands
-        if split[1] not in ["==", "<", "<=", ">", ">=", "!="]:
-            return False
+        if ruleType != "null":
+            if split[1] not in ["==", "<", "<=", ">", ">=", "!="] and ruleType != "null":
+                return False
 
         # invalid count rule type
         if ruleType == "count" and not re.match(r"\d+", split[2]):
@@ -66,24 +70,28 @@ class RuleEngine:
                 print(f"Skipping rule {r} with invalid properties in config.json rules - {rule}")
             else:
                 split = rule["rule"].split(" ")
+                ruleType = rule["ruleType"]
 
                 # next rule if rule verification fails
-                if not self.__VerifyRule(split):
+                if not self.__VerifyRule(split, ruleType):
                     print(f"Skipping malformed rule {r} in config.json rules - {rule}")
                     continue
 
+                # get lhs
                 lhs = split[0]
-                op = split[1]
-                rhs = split[2]
-                ruleType = rule["ruleType"]
+
+                # only get rhs and operator if rule type is not null
+                if not ruleType == "null":
+                    op = split[1]
+                    rhs = split[2]
 
                 # special conditions for specific ruleTypes
                 if ruleType == "count":
                     rhs = int(rhs) # cast to int
                 elif ruleType == "regex":
                     rhs = re.compile(rf"{rhs}")
+                # register null type operator and rhs here
                 elif ruleType == "null":
-                    lhs = split[0]
                     op = "=="
                     rhs = ""
 
