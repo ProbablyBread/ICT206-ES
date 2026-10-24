@@ -1,7 +1,6 @@
 import os
 import json
 import re
-import pprint
 
 from email.message import EmailMessage
 
@@ -14,8 +13,6 @@ class RuleEngine:
             raise FileNotFoundError("config.json not found.")
 
         self.__LoadRules()
-
-        pprint.PrettyPrinter(width=200).pprint(self.__ruleDict)
 
     def __VerifyRule(self, split, ruleType):
         # null rule type has too many variables
