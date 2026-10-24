@@ -12,10 +12,10 @@ class EmlES:
     __DESTINATION_HEADERS = ["TO", "CC", "BCC"]
     __CONFIDENCE_RANGES = {
         0.0: "Extremely unlikely to be a spam or phishing email.",
-        2.0: "Very unlikely to be a spam or phishing email.",
-        4.0: "Unlikely to be a spam or phishing email.",
-        6.0: "Likely to be a spam or phishing email.",
-        8.0: "Very likely to be a spam or phishing email.",
+        0.2: "Very unlikely to be a spam or phishing email.",
+        0.4: "Unlikely to be a spam or phishing email.",
+        0.6: "Likely to be a spam or phishing email.",
+        0.8: "Very likely to be a spam or phishing email.",
         1.0: "Extremely likely to be a spam or phishing email."
     }
 
