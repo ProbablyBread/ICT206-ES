@@ -1,6 +1,4 @@
 {
-    "senderOverrides": ["test@domain.com", "domain.com", "domain.com"],
-    "destinationOverrides": ["test@domain.com", "domain.com"],
     "rules": {
         "1": {
             "confidence": 1.0,

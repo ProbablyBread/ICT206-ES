@@ -5,55 +5,14 @@ import re
 from email.message import EmailMessage
 
 class RuleEngine:
-    __ORIGINATOR_HEADERS = ["FROM", "REPLY-TO", "SENDER"]
-    __DESTINATION_HEADERS = ["TO", "CC", "BCC"]
-
     def __init__(self):
         self.__ruleFile: str = f"{os.path.dirname(__file__)}/config.json"
         self.__ruleDict: dict[any][str] = {}
-        self.__senderOverrideDomains: list[str] = []
-        self.__senderOverrideEmails: list[str] = []
-        self.__destinationOverrideDomains: list[str] = []
-        self.__destinationOverrideEmails: list[str] = []
 
         if not os.path.exists(self.__ruleFile):
             raise FileNotFoundError("config.json not found.")
 
-        self.__LoadOverrides()
         self.__LoadRules()
-
-    def __LoadOverrides(self):
-        try:
-            full_json = json.load(open(self.__ruleFile, "r"))
-        except:
-            raise RuntimeError("Invalid config.json supplied.")
-
-        emailRegex = re.compile(r"^[A-Za-z0-9-_.]+@[A-Za-z0-9-]+\.(?:\.?[A-Za-z0-9-]+){1,}$")
-        domainRegex = re.compile(r"^[A-Za-z0-9-]+\.(?:\.?[A-Za-z0-9-]+){1,}$") 
-
-        # load sender overrides
-        for override in set(full_json["senderOverrides"]):
-            if emailRegex.match(override):
-                self.__senderOverrideEmails.append(override)
-            elif domainRegex.match(override):
-                self.__senderOverrideDomains.append(override)
-            else:
-                print(f"Skipping invalid email/domain of {override} in senderOverrides in config.json.")
-
-        # load destination overrides
-        for override in set(full_json["destinationOverrides"]):
-            if emailRegex.match(override):
-                self.__destinationOverrideEmails.append(override)
-            elif domainRegex.match(override):
-                self.__destinationOverrideDomains.append(override)
-            else:
-                print(f"Skipping invalid email/domain of {override} in senderOverrides in config.json.")
-
-        # deduplicate all lists
-        self.__senderOverrideEmails = list(set(self.__senderOverrideEmails))
-        self.__senderOverrideDomains = list(set(self.__senderOverrideDomains))
-        self.__destinationOverrideEmails = list(set(self.__destinationOverrideEmails))
-        self.__destinationOverrideDomains = list(set(self.__destinationOverrideDomains))
 
     def __VerifyRule(self, split):
         # too many variables
@@ -97,6 +56,7 @@ class RuleEngine:
                     matchObj = re.findall(r"^COUNT\((\w+)\)", split[0].upper())
                     ruleType = "count"
                     lhs = matchObj[0]
+                    rhs = int(rhs)
                 elif re.match(r"^NULL$", split[0].upper()):
                     ruleType = "null"
                     lhs = ""
@@ -137,23 +97,37 @@ class RuleEngine:
             rule = self.__ruleDict[rule]
 
             # check each rule type, if headers are missing, skip the rule
+            # perform comparison against the actual header value for each rule
             if rule["type"] == "normal":
                 if rule["lhs"] not in [h.upper() for h in headers.keys()] or rule["rhs"] not in [h.upper() for h in headers.keys()]:
                     continue
+
+                if self.__Compare(headers.get_all(rule["lhs"]), rule["op"], headers.get_all(rule["rhs"])):
+                    confidence += rule["confidence"]
+                    reasoning[ruleNum] = f"{rule["description"]} (+{rule["confidence"]})"
+
             elif rule["type"] == "count":
                 if rule["lhs"] not in [h.upper() for h in headers.keys()]:
                     continue
+
+                if self.__Compare(len(headers.get_all(rule["lhs"])), rule["op"], rule["rhs"]):
+                    confidence += rule["confidence"]
+                    reasoning[ruleNum] = f"{rule["description"]} (+{rule["confidence"]})"
+
             elif rule["type"] == "null":
-                if rule["lhs"] == "null" and rule["rhs"] not in [h.upper() for h in headers.keys()]:
+                if rule["lhs"] == "" and rule["rhs"] not in [h.upper() for h in headers.keys()]:
                     continue
-                elif rule["rhs"] == "null" and rule["lhs"] not in [h.upper() for h in headers.keys()]:
+                elif rule["rhs"] == "" and rule["lhs"] not in [h.upper() for h in headers.keys()]:
                     continue
+
+                if rule["lhs"] == "" and self.__Compare("", rule["op"], headers.get_all(rule["rhs"])):
+                    confidence += rule["confidence"]
+                    reasoning[ruleNum] = f"{rule["description"]} (+{rule["confidence"]})"
+                elif rule["rhs"] == "" and self.__Compare(headers.get_all(rule["lhs"]), rule["op"], ""):
+                    confidence += rule["confidence"]
+                    reasoning[ruleNum] = f"{rule["description"] (+{rule["confidence"]})}" 
             else:
                 # this should technically never happen
                 raise RuntimeError("Invalid rule supplied.")
-
-            if self.__Compare(rule["lhs"], rule["op"], rule["rhs"]):
-                confidence += rule["confidence"]
-                reasoning[ruleNum] = f"{rule["description"]} (+{rule["confidence"]})"
 
         return confidence, reasoning
