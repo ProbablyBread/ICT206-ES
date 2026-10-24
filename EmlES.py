@@ -10,6 +10,14 @@ import re
 class EmlES:
     __ORIGINATOR_HEADERS = ["FROM", "REPLY-TO", "SENDER"]
     __DESTINATION_HEADERS = ["TO", "CC", "BCC"]
+    __CONFIDENCE_RANGES = {
+        0.0: "Extremely unlikely to be a spam or phishing email.",
+        2.0: "Very unlikely to be a spam or phishing email.",
+        4.0: "Unlikely to be a spam or phishing email.",
+        6.0: "Likely to be a spam or phishing email.",
+        8.0: "Very likely to be a spam or phishing email.",
+        1.0: "Extremely likely to be a spam or phishing email."
+    }
 
     # init static rule engine
     __ruleEngine = RuleEngine()
@@ -101,12 +109,12 @@ Reasoning: {self.__reasoning}
                         if email == "" or email == None:
                             email = "None"
 
-                        self.__confidence += 0.8
+                        self.__confidence += 0.4
 
                         if not "1001" in self.__reasoning.keys():
                             self.__reasoning["1001"] = []
 
-                        self.__reasoning["1001"].append(f"Invalid email address of {email} in the {header} header. (+0.8)")
+                        self.__reasoning["1001"].append(f"Invalid email address of {email} in the {header} header. (+0.4)")
 
                         if self.__confidence >= 1.0:
                             self.__confidence = 1.0

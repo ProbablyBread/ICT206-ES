@@ -14,9 +14,16 @@ class RuleEngine:
 
         self.__LoadRules()
 
-    def __VerifyRule(self, split):
-        # too many variables
-        if len(split) != 3:
+    def __VerifyRule(self, split, ruleType):
+        # null rule type has too many variables
+        if ruleType == "null" and len(split) != 1:
+            return False
+        # otherwise, it must be 3 variables
+        elif len(split) != 3:
+            return False
+
+        # check for valid ruleTypes
+        if ruleType not in ["address", "regex", "count", "header", "null"]:
             return False
 
         # invalid operands
@@ -24,8 +31,25 @@ class RuleEngine:
             return False
 
         # invalid count rule type
-        if re.match(r"^COUNT\(.*\)", split[0]) and not re.match(r"\d+", split[2]):
+        if ruleType == "count" and not re.match(r"\d+", split[2]):
             return False
+
+        # invalid email address for email rule type
+        if ruleType == "address": 
+            if not re.match(r"[A-Za-z0-9-_.]+@[A-Za-z0-9-]+\.(?:\.?[A-Za-z0-9-]+){1,}", split[2]):
+                return False
+            elif split[1] not in ["==", "!="]:
+                return False
+
+        # unable to compile regex for regex rule type
+        if ruleType == "regex":
+            try: 
+                _ = re.compile(rf"{split[2]}")
+            except:
+                return False
+
+            if split[1] not in ["==", "!="]:
+                return False
 
         return True
 
@@ -38,7 +62,7 @@ class RuleEngine:
         for r in full_json["rules"]:
             rule = full_json["rules"][r]
 
-            if "confidence" not in rule.keys() or "rule" not in rule.keys() or "description" not in rule.keys():
+            if "confidence" not in rule.keys() or "rule" not in rule.keys() or "description" not in rule.keys() or "ruleType" not in rule.keys():
                 print(f"Skipping rule {r} with invalid properties in config.json rules - {rule}")
             else:
                 split = rule["rule"].split(" ")
@@ -51,20 +75,17 @@ class RuleEngine:
                 lhs = split[0]
                 op = split[1]
                 rhs = split[2]
+                ruleType = rule["ruleType"]
 
-                if re.match(r"^COUNT\(.*\)", split[0].upper()):
-                    matchObj = re.findall(r"^COUNT\((\w+)\)", split[0].upper())
-                    ruleType = "count"
-                    lhs = matchObj[0]
-                    rhs = int(rhs)
-                elif re.match(r"^NULL$", split[0].upper()):
-                    ruleType = "null"
-                    lhs = ""
-                elif re.match(r"^NULL$", split[2].upper()):
-                    ruleType = "null"
+                # special conditions for specific ruleTypes
+                if ruleType == "count":
+                    rhs = int(rhs) # cast to int
+                elif ruleType == "regex":
+                    rhs = re.compile(rf"{rhs}")
+                elif ruleType == "null":
+                    lhs = split[0]
+                    op = "=="
                     rhs = ""
-                else:
-                    ruleType = "normal"
 
                 tempDict = {
                     "lhs": lhs, 
@@ -98,7 +119,7 @@ class RuleEngine:
 
             # check each rule type, if headers are missing, skip the rule
             # perform comparison against the actual header value for each rule
-            if rule["type"] == "normal":
+            if rule["type"] == "header":
                 if rule["lhs"] not in [h.upper() for h in headers.keys()] or rule["rhs"] not in [h.upper() for h in headers.keys()]:
                     continue
 
@@ -114,18 +135,25 @@ class RuleEngine:
                     confidence += rule["confidence"]
                     reasoning[ruleNum] = f"{rule["description"]} (+{rule["confidence"]})"
 
-            elif rule["type"] == "null":
-                if rule["lhs"] == "" and rule["rhs"] not in [h.upper() for h in headers.keys()]:
-                    continue
-                elif rule["rhs"] == "" and rule["lhs"] not in [h.upper() for h in headers.keys()]:
+            elif rule["type"] == "regex":
+                if rule["lhs"] not in [h.upper() for h in headers.keys()]:
                     continue
 
-                if rule["lhs"] == "" and self.__Compare("", rule["op"], headers.get_all(rule["rhs"])):
+                if rule["op"] == "==" and rule["rhs"].match(rule["lhs"]):
                     confidence += rule["confidence"]
                     reasoning[ruleNum] = f"{rule["description"]} (+{rule["confidence"]})"
-                elif rule["rhs"] == "" and self.__Compare(headers.get_all(rule["lhs"]), rule["op"], ""):
+                elif rule["op"] == "!=" and not rule["rhs"].match(rule["lhs"]):
                     confidence += rule["confidence"]
-                    reasoning[ruleNum] = f"{rule["description"] (+{rule["confidence"]})}" 
+                    reasoning[ruleNum] = f"{rule["description"]} (+{rule["confidence"]})"
+
+            elif rule["type"] == "address" or rule["type"] == "null":
+                if rule["lhs"] not in [h.upper() for h in headers.keys()]:
+                    continue
+
+                if self.__Compare(rule["lhs"], rule["op"], rule["rhs"]):
+                    confidence += rule["confidence"]
+                    reasoning[ruleNum] = f"{rule["description"]} (+{rule["confidence"]})"
+
             else:
                 # this should technically never happen
                 raise RuntimeError("Invalid rule supplied.")
