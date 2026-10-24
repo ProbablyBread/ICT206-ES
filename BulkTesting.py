@@ -52,6 +52,9 @@ print(f"Successfully parsed {parsed} files over {end:.2f} seconds.")
 if errors > 0:
     print(f"Errors were encountered parsing {errors} file(s).\n")
 
+likelySummary = extremelyLikely + veryLikely + likely
+unlikelySummary = veryUnlikely + extremelyUnlikely
+
 print("Results: ")
 
 if extremelyUnlikely > 0:
@@ -68,3 +71,11 @@ if veryLikely > 0:
 
 if extremelyLikely > 0:
     print(f"{extremelyLikely} email(s) were detected to be extremely likely to be spam/malicious ({(extremelyLikely / parsed) * 100:.2f}%)")
+
+print("\nSummary: ")
+
+if likelySummary > 0:
+    print(f"{likelySummary} email(s) were detected to be phishing emails ({likelySummary / parsed * 100:.2f}%)")
+
+if unlikelySummary > 0:
+    print(f"{unlikelySummary} email(s) were detected to be phishing emails ({unlikelySummary / parsed * 100:.2f}%)")
