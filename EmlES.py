@@ -50,12 +50,15 @@ class EmlES:
             return self.__emlFile == other.__emlFile
 
     def __str__(self):
-        outputReasoning = []
+        if len(self.__reasoning) > 0:
+            outputReasoning = []
 
-        for rule in self.__reasoning:
-            outputReasoning.append(f"Rule {rule}: {self.__reasoning[rule]}")
+            for rule in self.__reasoning:
+                outputReasoning.append(f"Rule {rule}: {self.__reasoning[rule]}")
 
-        outputReasoning = "\n\t".join(outputReasoning)
+            outputReasoning = "\n\t".join(outputReasoning)
+        else:
+            outputReasoning = "None"
 
         match self.__confidence:
             case self.__confidence if 0.0 <= self.__confidence < 0.2:
