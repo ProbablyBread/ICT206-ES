@@ -10,14 +10,6 @@ import re
 class EmlES:
     __ORIGINATOR_HEADERS = ["FROM", "REPLY-TO", "SENDER"]
     __DESTINATION_HEADERS = ["TO", "CC", "BCC"]
-    __CONFIDENCE_RANGES = {
-        0.0: "Extremely unlikely to be a spam or phishing email.",
-        0.2: "Very unlikely to be a spam or phishing email.",
-        0.4: "Unlikely to be a spam or phishing email.",
-        0.6: "Likely to be a spam or phishing email.",
-        0.8: "Very likely to be a spam or phishing email.",
-        1.0: "Extremely likely to be a spam or phishing email."
-    }
 
     # init static rule engine
     __ruleEngine = RuleEngine()
@@ -34,7 +26,7 @@ class EmlES:
         # run rules if not already fully confident
         if not self.__confidence >= 1.0:
             self.__confidence, self.__reasoning = self.__ruleEngine.Process(self.__headers, self.__confidence, self.__reasoning)
-
+            
     @property
     def confidence(self):
         return self.__confidence
@@ -50,20 +42,37 @@ class EmlES:
     @property
     def emlFile(self):
         return self.__emlFile
-
+    
     def __eq__(self, other):
         if not type(self) is type(other):
             return NotImplemented
         else:
             return self.__emlFile == other.__emlFile
 
-    # change this to eventually only print what the user wants to see
     def __str__(self):
-        return f"""Headers:\n {self.__headers}\n
-File Path: {self.__emlFile}
-Confidence: {self.__confidence}
-Reasoning: {self.__reasoning}
-"""
+        outputReasoning = []
+
+        for rule in self.__reasoning:
+            outputReasoning.append(f"Rule {rule}: {self.__reasoning[rule]}")
+
+        outputReasoning = "\n\t".join(outputReasoning)
+
+        match self.__confidence:
+            case self.__confidence if 0.0 <= self.__confidence < 0.2:
+                outputConfidence = f"Extremely unlikely to be a malicious or spam email. (Confidence score: {self.__confidence})"
+            case self.__confidence if 0.2 <= self.__confidence < 0.4:
+                outputConfidence = f"Very unlikely to be a malicious or spam email. (Confidence score: {self.__confidence})"
+            case self.__confidence if 0.4 <= self.__confidence < 0.6:
+                outputConfidence = f"Likely to be a malicious or spam email. (Confidence score: {self.__confidence})"
+            case self.__confidence if 0.6 <= self.__confidence < 0.8: 
+                outputConfidence = f"Very likely to be a malicious or spam email. (Confidence score: {self.__confidence})"
+            case self.__confidence if 0.8 <= self.__confidence <= 1.0:
+                outputConfidence = f"Extremely likely to be a malicious or spam email. (Confidence score: {self.__confidence})"
+            case _:
+                # this likely wouldn't happen at all
+                raise ValueError(f"Invalid confidence value of {self.__confidence}")
+
+        return f"Successfully processed: {self.__emlFile}\nOutcome: {outputConfidence}\nRules Triggered:\n\t{outputReasoning}"
 
     def __ParseEmlHeaders(self, filePath):
         if not os.path.exists(filePath):

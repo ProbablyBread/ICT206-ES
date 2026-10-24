@@ -5,17 +5,10 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "name": "Debug Run with TestAll.py",
+            "name": "Bulk Test",
             "type": "debugpy",
             "request": "launch",
-            "program": "${workspaceFolder}/TestAll.py",
-            "console": "integratedTerminal"
-        },
-        {
-            "name": "Debug Run with TestRuleEngine.py",
-            "type": "debugpy",
-            "request": "launch",
-            "program": "${workspaceFolder}/TestRuleEngine.py",
+            "program": "${workspaceFolder}/BulkTesting.py",
             "console": "integratedTerminal"
         }
     ]
