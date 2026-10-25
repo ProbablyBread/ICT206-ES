@@ -28,7 +28,7 @@ class RuleEngine:
 
         # invalid operands
         if ruleType != "null":
-            if split[1] not in ["==", "<", "<=", ">", ">=", "!="] and ruleType != "null":
+            if split[1] not in ["==", "<", "<=", ">", ">=", "!="]:
                 return False
 
         # invalid count rule type
