@@ -75,7 +75,7 @@ class EmlES:
                 # this likely wouldn't happen at all
                 raise ValueError(f"Invalid confidence value of {self.__confidence}")
 
-        return f"Successfully processed: {self.__emlFile}\nOutcome: {outputConfidence}\nRules Triggered:\n\t{outputReasoning}"
+        return f"Successfully processed: {self.__emlFile}\nOutcome: {outputConfidence}\nRules Fired:\n\t{outputReasoning}"
 
     def __ParseEmlHeaders(self, filePath):
         if not os.path.exists(filePath):

@@ -10,6 +10,13 @@
             "request": "launch",
             "program": "${workspaceFolder}/BulkTesting.py",
             "console": "integratedTerminal"
+        },
+        {
+            "name": "Single Test",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "${workspaceFolder}/RunES.py",
+            "console": "integratedTerminal"
         }
     ]
 }
