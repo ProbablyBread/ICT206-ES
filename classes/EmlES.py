@@ -1,4 +1,4 @@
-from RuleEngine import RuleEngine
+from classes.RuleEngine import RuleEngine
 
 from email.parser import BytesFeedParser
 from email.message import EmailMessage

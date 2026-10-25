@@ -1,5 +1,5 @@
 try:
-    from EmlES import EmlES
+    from classes.EmlES import EmlES
 except FileNotFoundError as e:
     print(f"FileNotFoundError: {e}")
     exit(1)
