@@ -92,7 +92,7 @@ class EmlES:
         self.__headers = parser.close()
 
         if len(self.__headers.keys()) == 0:
-            raise RuntimeError(f"Unable to parse input .eml file due to malformed headers.")
+            raise RuntimeError(f"Unable to parse input .eml file due to malformed headers or file is not a valid .eml file.")
 
         emailRegex = re.compile(r"[A-Za-z0-9-_.]+@[A-Za-z0-9-]+\.(?:\.?[A-Za-z0-9-]+){1,}")
 
