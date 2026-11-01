@@ -16,7 +16,7 @@ class EmlES:
 
     def __init__(self, filePath):
         self.__confidence: float = 0.0 # confidence rating
-        self.__reasoning: dict[any][str] = {} # dict of rule hits 
+        self.__reasoning: dict = {} # dict of rule hits 
         self.__emlFile: str = "None" # path to .eml file
         self.__headers: EmailMessage = None # eml file headers
 
