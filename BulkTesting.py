@@ -30,22 +30,28 @@ extremelyLikely = 0
 for file in files:
     try:
         eml = EmlES(f"{dir}/{file}")
+        confidence = eml.confidence
+
+        if 0.0 <= confidence < 0.2:
+            extremelyUnlikely += 1
+        elif confidence < 0.4:
+            veryUnlikely += 1
+        elif confidence < 0.6:
+            likely += 1
+        elif confidence < 0.8:
+            veryLikely += 1
+        elif confidence <= 1.0:
+            extremelyLikely += 1
+        else:
+            # this likely won't happen
+            errors += 1
+            continue
+
         parsed += 1
-        
+
         if parsed % 10 == 0 or parsed == len(files):
             print(f"Progress: {parsed}/{len(files)}", end='\r')
-        
-        match eml.confidence:
-            case eml.confidence if 0.0 <= eml.confidence < 0.2:
-                extremelyUnlikely += 1
-            case eml.confidence if 0.2 <= eml.confidence < 0.4:
-                veryUnlikely += 1
-            case eml.confidence if 0.4 <= eml.confidence < 0.6:
-                likely += 1
-            case eml.confidence if 0.6 <= eml.confidence < 0.8:
-                veryLikely += 1
-            case eml.confidence if 0.8 <= eml.confidence <= 1.0:
-                extremelyLikely += 1
+
     except Exception:
         errors += 1
 
@@ -53,6 +59,8 @@ print(f"Successfully parsed {parsed} files over {time.time() - start:.2f} second
 
 if errors > 0:
     print(f"Errors were encountered parsing {errors} file(s).\n")
+else:
+    print("\n")
 
 likelySummary = extremelyLikely + veryLikely + likely
 unlikelySummary = veryUnlikely + extremelyUnlikely

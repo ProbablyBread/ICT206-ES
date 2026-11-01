@@ -163,4 +163,7 @@ class RuleEngine:
                 # this should technically never happen
                 raise RuntimeError("Invalid rule supplied.")
 
+        if confidence >= 1.0:
+            confidence = 1.0
+
         return confidence, reasoning
