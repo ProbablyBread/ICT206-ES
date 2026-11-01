@@ -97,7 +97,7 @@ class EmlES:
         emailRegex = re.compile(r"[A-Za-z0-9-_.]+@[A-Za-z0-9-]+\.(?:\.?[A-Za-z0-9-]+){1,}")
 
         if len(self.__headers.defects) > 0:
-            self.__confidence += len(self.__headers.defects) * 0.2
+            self.__confidence += len(self.__headers.defects) * 0.1
 
             if len(self.__headers.defects) == 1:
                 string = "malformed header"
@@ -121,12 +121,12 @@ class EmlES:
                         if email == "" or email == None:
                             email = "None"
 
-                        self.__confidence += 0.4
+                        self.__confidence += 0.6
 
-                        if not "1001" in self.__reasoning.keys():
-                            self.__reasoning["1001"] = []
+                        if not "-1" in self.__reasoning.keys():
+                            self.__reasoning["-1"] = []
 
-                        self.__reasoning["1001"].append(f"Invalid email address of {email} in the {header} header. (+0.4)")
+                        self.__reasoning["-1"].append(f"Invalid email address of {email} in the {header} header. (+0.4)")
 
                         if self.__confidence >= 1.0:
                             self.__confidence = 1.0
