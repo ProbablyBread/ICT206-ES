@@ -19,13 +19,16 @@ if len(sys.argv) == 1:
 elif len(sys.argv) == 2:
     dir = sys.argv[1]
 else:
-    print("Invalid directory provided, or too many arguments.")
+    print("Too many arguments provided.")
     exit(1)
 
 start = time.time()
 
-dir = "./data"
-files = os.listdir(dir)
+try:
+    files = os.listdir(dir)
+except Exception as e:
+    print(f"Unable to list directory {dir}: {e}")
+    exit(1)
 
 parsed = 0
 errors = 0
