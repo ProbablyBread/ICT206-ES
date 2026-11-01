@@ -55,11 +55,13 @@ class RuleEngine:
         return True
 
     def __LoadRules(self):
+        # load entire json from config
         try:
             full_json = json.load(open(self.__ruleFile, "r"))
         except:
             raise RuntimeError("Invalid config.json supplied.")
 
+        # loop through all rules in the json file
         for r in full_json["rules"]:
             rule = full_json["rules"][r]
 
@@ -114,9 +116,10 @@ class RuleEngine:
             case _: raise ValueError("Invalid comparison operator") # this should technically never happen
 
     def Process(self, headers: EmailMessage, confidence: float, reasoning: dict):
+        # loop through all processed rules
         for rule in self.__ruleDict:
+            # break and return if confidence is >= 1.0
             if confidence >= 1.0:
-                confidence = 1.0
                 break
 
             ruleNum = rule
@@ -163,6 +166,7 @@ class RuleEngine:
                 # this should technically never happen
                 raise RuntimeError("Invalid rule supplied.")
 
+        # clamp confidence to 1.0 if it exceeds
         if confidence >= 1.0:
             confidence = 1.0
 

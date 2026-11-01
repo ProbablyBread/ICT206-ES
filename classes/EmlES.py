@@ -49,7 +49,9 @@ class EmlES:
         else:
             return self.__emlFile == other.__emlFile
 
+    # for print() output
     def __str__(self):
+        # check if any rules were fired
         if len(self.__reasoning) > 0:
             outputReasoning = []
 
@@ -58,22 +60,22 @@ class EmlES:
 
             outputReasoning = "\n\t".join(outputReasoning)
         else:
-            outputReasoning = "None"
+            outputReasoning = "No rules were fired."
 
-        match self.__confidence:
-            case self.__confidence if 0.0 <= self.__confidence < 0.2:
-                outputConfidence = f"Extremely unlikely to be a malicious or spam email. (Confidence score: {self.__confidence})"
-            case self.__confidence if 0.2 <= self.__confidence < 0.4:
-                outputConfidence = f"Very unlikely to be a malicious or spam email. (Confidence score: {self.__confidence})"
-            case self.__confidence if 0.4 <= self.__confidence < 0.6:
-                outputConfidence = f"Likely to be a malicious or spam email. (Confidence score: {self.__confidence})"
-            case self.__confidence if 0.6 <= self.__confidence < 0.8: 
-                outputConfidence = f"Very likely to be a malicious or spam email. (Confidence score: {self.__confidence})"
-            case self.__confidence if 0.8 <= self.__confidence <= 1.0:
-                outputConfidence = f"Extremely likely to be a malicious or spam email. (Confidence score: {self.__confidence})"
-            case _:
-                # this likely wouldn't happen at all
-                raise ValueError(f"Invalid confidence value of {self.__confidence}")
+        # confidence ranges
+        if 0.0 <= self.__confidence < 0.2:
+            outputConfidence = f"Extremely unlikely to be a malicious or spam email. (Confidence score: {self.__confidence})"
+        elif self.__confidence < 0.4:
+            outputConfidence = f"Very unlikely to be a malicious or spam email. (Confidence score: {self.__confidence})"
+        elif self.__confidence < 0.6:
+            outputConfidence = f"Likely to be a malicious or spam email. (Confidence score: {self.__confidence})"
+        elif self.__confidence < 0.8:
+            outputConfidence = f"Very likely to be a malicious or spam email. (Confidence score: {self.__confidence})"
+        elif self.__confidence <= 1.0:
+            outputConfidence = f"Extremely likely to be a malicious or spam email. (Confidence score: {self.__confidence})"
+        else:
+            # this likely wouldn't happen at all
+            raise ValueError(f"Invalid self.__confidence value of {self.__confidence} for file {self.__emlFile}.")
 
         return f"Successfully processed: {self.__emlFile}\nOutcome: {outputConfidence}\nRules Fired:\n\t{outputReasoning}"
 
@@ -82,20 +84,23 @@ class EmlES:
             raise ValueError(f"Invalid file provided.")
 
         self.__emlFile = filePath
+        parser = BytesFeedParser(policy=policy.default) # bytes parser for singular lines
 
-        parser = BytesFeedParser(policy=policy.default)
-
-        with open(filePath, 'rb') as emlFile:
+        # read file in as bytes
+        with open(self.__emlFile, 'rb') as emlFile:
             for line in emlFile:
-                parser.feed(line)
+                parser.feed(line) # feed single lines into parser
 
-        self.__headers = parser.close()
+        self.__headers = parser.close() # parser.close() produces an EmailMessage object
 
+        # check if any headers were processed
         if len(self.__headers.keys()) == 0:
             raise RuntimeError(f"Unable to parse input .eml file due to malformed headers or file is not a valid .eml file.")
 
+        # email regex matching e.g. abc@xyz.com or abc@xyz.yyy.com
         emailRegex = re.compile(r"[A-Za-z0-9-_.]+@[A-Za-z0-9-]+\.(?:\.?[A-Za-z0-9-]+){1,}")
 
+        # check for header defects
         if len(self.__headers.defects) > 0:
             self.__confidence += len(self.__headers.defects) * 0.1
 
@@ -106,27 +111,28 @@ class EmlES:
 
             self.__reasoning["-2"] = f"{len(self.__headers.defects)} {string} detected. (+{self.__confidence})"
 
+        # loop through all sender and receiver headers
         for header in self.__ORIGINATOR_HEADERS + self.__DESTINATION_HEADERS:
-            emails = self.__headers.get_all(header)
+            addresses = self.__headers.get_all(header)
 
             # extract email address only if header exists
-            if emails is not None:
-                for email in emails:
-                    matches = emailRegex.findall(email)
+            if addresses is not None:
+                for address in addresses:
+                    matches = emailRegex.findall(address)
 
                     if len(matches) > 0:
                         self.__headers.replace_header(header, matches)
                     else:
                         # if any address in the list cannot be parsed for any reason
-                        if email == "" or email == None:
-                            email = "None"
+                        if address == "" or address == None:
+                            address = "None"
 
                         self.__confidence += 0.6
 
                         if not "-1" in self.__reasoning.keys():
                             self.__reasoning["-1"] = []
 
-                        self.__reasoning["-1"].append(f"Invalid email address of {email} in the {header} header. (+0.4)")
+                        self.__reasoning["-1"].append(f"Invalid email address of {address} in the {header} header. (+0.6)")
 
                         if self.__confidence >= 1.0:
                             self.__confidence = 1.0
