@@ -7,7 +7,7 @@ from email.message import EmailMessage
 class RuleEngine:
     def __init__(self):
         self.__ruleFile: str = f"{os.path.dirname(__file__)}/config.json"
-        self.__ruleDict: dict[any][str] = {}
+        self.__ruleDict: dict = {}
 
         if not os.path.exists(self.__ruleFile):
             raise FileNotFoundError("config.json not found.")
@@ -113,7 +113,7 @@ class RuleEngine:
             case "!=": return lhs != rhs
             case _: raise ValueError("Invalid comparison operator") # this should technically never happen
 
-    def Process(self, headers: EmailMessage, confidence: float, reasoning: dict[any][str]):
+    def Process(self, headers: EmailMessage, confidence: float, reasoning: dict):
         for rule in self.__ruleDict:
             if confidence >= 1.0:
                 confidence = 1.0
