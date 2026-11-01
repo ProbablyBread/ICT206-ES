@@ -104,7 +104,7 @@ class EmlES:
             else:
                 string = "malformed headers"
 
-            self.__reasoning["1000"] = f"{len(self.__headers.defects)} {string} detected. (+{self.__confidence})"
+            self.__reasoning["-2"] = f"{len(self.__headers.defects)} {string} detected. (+{self.__confidence})"
 
         for header in self.__ORIGINATOR_HEADERS + self.__DESTINATION_HEADERS:
             emails = self.__headers.get_all(header)
