@@ -62,7 +62,10 @@ for file in files:
         parsed += 1
 
         if parsed % 10 == 0 or parsed == len(files):
-            print(f"Progress: {parsed}/{len(files)}", end='\r')
+            print(f"Progress: {parsed} of {len(files)}", end='\r')
+
+        if errors > 0:
+            print(f"          {errors} files cannot be parsed.", end = '\r')
 
     except Exception:
         errors += 1
