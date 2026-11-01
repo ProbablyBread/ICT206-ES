@@ -61,8 +61,8 @@ for file in files:
 
         parsed += 1
 
-        if parsed % 10 == 0 or parsed == len(files):
-            print(f"Progress: {parsed} of {len(files)} (Elapsed: {time.time() - start:.2f} seconds)", end='\r')
+        if parsed % 50 == 0 or parsed == len(files):
+            print(f"Progress: {parsed} of {len(files)}", end='\r')
 
     except Exception:
         errors += 1
