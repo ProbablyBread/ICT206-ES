@@ -16,6 +16,8 @@ import time
 start = time.time()
 
 dir = "./data"
+files = os.listdir(dir)
+
 parsed = 0
 errors = 0
 
@@ -25,11 +27,14 @@ likely = 0
 veryLikely = 0
 extremelyLikely = 0
 
-for file in os.listdir(dir):
+for file in files:
     try:
         eml = EmlES(f"{dir}/{file}")
         parsed += 1
-
+        
+        if parsed % 10 == 0 or parsed == len(files):
+            print(f"Progress: {parsed}/{len(files)}", end='\r')
+        
         match eml.confidence:
             case eml.confidence if 0.0 <= eml.confidence < 0.2:
                 extremelyUnlikely += 1
