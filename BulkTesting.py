@@ -12,6 +12,15 @@ except Exception as e:
 
 import os
 import time
+import sys
+
+if len(sys.argv) == 1:
+    dir = "./data"
+elif len(sys.argv) == 2:
+    dir = sys.argv[1]
+else:
+    print("Invalid directory provided, or too many arguments.")
+    exit(1)
 
 start = time.time()
 
