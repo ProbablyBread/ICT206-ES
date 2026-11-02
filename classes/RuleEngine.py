@@ -159,6 +159,10 @@ class RuleEngine:
                 if rule["lhs"] not in [h.upper() for h in headers.keys()]:
                     confidence += rule["confidence"]
                     reasoning[ruleNum] = f"{rule["description"]} (+{rule["confidence"]})"
+                else:
+                    if self.__Compare(headers.get_all(rule["lhs"])[0], rule["op"], rule["rhs"]):
+                        confidence += rule["confidence"]
+                        reasoning[ruleNum] = f"{rule["description"]} (+{rule["confidence"]})"
 
             else:
                 # this should technically never happen

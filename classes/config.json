@@ -45,7 +45,7 @@
         "8": {
             "confidence": 0.4,
             "rule": "MESSAGE-ID",
-            "description": "The MESSAGE-ID header is empty.",
+            "description": "The MESSAGE-ID header is empty or missing.",
             "ruleType": "null"
         },
         "9": {
