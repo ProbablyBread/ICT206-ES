@@ -46,11 +46,11 @@ for file in files:
 
         if 0.0 <= confidence < 0.2:
             extremelyUnlikely += 1
-        elif confidence < 0.4:
+        elif confidence < 0.5:
             veryUnlikely += 1
-        elif confidence < 0.6:
+        elif confidence < 0.7:
             likely += 1
-        elif confidence < 0.8:
+        elif confidence < 0.9:
             veryLikely += 1
         elif confidence <= 1.0:
             extremelyLikely += 1

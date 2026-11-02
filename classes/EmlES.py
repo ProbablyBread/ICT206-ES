@@ -65,11 +65,11 @@ class EmlES:
         # confidence ranges
         if 0.0 <= self.__confidence < 0.2:
             outputConfidence = f"Extremely unlikely to be a malicious or spam email. (Confidence score: {self.__confidence})"
-        elif self.__confidence < 0.4:
+        elif self.__confidence < 0.5:
             outputConfidence = f"Very unlikely to be a malicious or spam email. (Confidence score: {self.__confidence})"
-        elif self.__confidence < 0.6:
+        elif self.__confidence < 0.7:
             outputConfidence = f"Likely to be a malicious or spam email. (Confidence score: {self.__confidence})"
-        elif self.__confidence < 0.8:
+        elif self.__confidence < 0.9:
             outputConfidence = f"Very likely to be a malicious or spam email. (Confidence score: {self.__confidence})"
         elif self.__confidence <= 1.0:
             outputConfidence = f"Extremely likely to be a malicious or spam email. (Confidence score: {self.__confidence})"
