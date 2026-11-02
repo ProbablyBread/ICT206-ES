@@ -102,7 +102,7 @@ class EmlES:
 
         # check for header defects
         if len(self.__headers.defects) > 0:
-            self.__confidence += len(self.__headers.defects) * 0.1
+            self.__confidence += len(self.__headers.defects) * 0.5
 
             if len(self.__headers.defects) == 1:
                 string = "malformed header"
@@ -127,7 +127,7 @@ class EmlES:
                         if address == "" or address == None:
                             address = "None"
 
-                        self.__confidence += 0.6
+                        self.__confidence += 0.7
 
                         if not "-1" in self.__reasoning.keys():
                             self.__reasoning["-1"] = []
