@@ -131,7 +131,7 @@ class RuleEngine:
                 if rule["lhs"] not in [h.upper() for h in headers.keys()] or rule["rhs"] not in [h.upper() for h in headers.keys()]:
                     continue
 
-                if self.__Compare(headers.get_all(rule["lhs"]), rule["op"], headers.get_all(rule["rhs"])):
+                if self.__Compare(headers.get_all(rule["lhs"])[0], rule["op"], headers.get_all(rule["rhs"])[0]):
                     confidence += rule["confidence"]
                     reasoning[ruleNum] = f"{rule["description"]} (+{rule["confidence"]})"
 
@@ -147,18 +147,16 @@ class RuleEngine:
                 if rule["lhs"] not in [h.upper() for h in headers.keys()]:
                     continue
 
-                if rule["op"] == "==" and rule["rhs"].match(rule["lhs"]):
-                    confidence += rule["confidence"]
-                    reasoning[ruleNum] = f"{rule["description"]} (+{rule["confidence"]})"
-                elif rule["op"] == "!=" and not rule["rhs"].match(rule["lhs"]):
+                if rule["op"] == "==" and rule["rhs"].search(headers.get_all(rule["lhs"])[0]):
                     confidence += rule["confidence"]
                     reasoning[ruleNum] = f"{rule["description"]} (+{rule["confidence"]})"
 
-            elif rule["type"] == "address" or rule["type"] == "null":
+                elif rule["op"] == "!=" and not rule["rhs"].search(headers.get_all(rule["lhs"])[0]):
+                    confidence += rule["confidence"]
+                    reasoning[ruleNum] = f"{rule["description"]} (+{rule["confidence"]})"
+
+            elif rule["type"] == "null":
                 if rule["lhs"] not in [h.upper() for h in headers.keys()]:
-                    continue
-
-                if self.__Compare(rule["lhs"], rule["op"], rule["rhs"]):
                     confidence += rule["confidence"]
                     reasoning[ruleNum] = f"{rule["description"]} (+{rule["confidence"]})"
 
