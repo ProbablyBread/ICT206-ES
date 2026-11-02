@@ -37,7 +37,7 @@ class RuleEngine:
 
         # invalid email address for email rule type
         if ruleType == "address": 
-            if not re.match(r"[A-Za-z0-9-_.]+@[A-Za-z0-9-]+\.(?:\.?[A-Za-z0-9-]+){1,}", split[2]):
+            if not re.match(r"<?[A-Za-z0-9-_.]+@[A-Za-z0-9-]+\.(?:\.?[A-Za-z0-9-]+){1,}>?", split[2]):
                 return False
             elif split[1] not in ["==", "!="]:
                 return False
@@ -131,7 +131,7 @@ class RuleEngine:
                 if rule["lhs"] not in [h.upper() for h in headers.keys()] or rule["rhs"] not in [h.upper() for h in headers.keys()]:
                     continue
 
-                if self.__Compare(headers.get_all(rule["lhs"])[0], rule["op"], headers.get_all(rule["rhs"])[0]):
+                if self.__Compare(headers.get_all(rule["lhs"])[0].strip("<>"), rule["op"], headers.get_all(rule["rhs"])[0].strip("<>")):
                     confidence += rule["confidence"]
                     reasoning[ruleNum] = f"{rule["description"]} (+{rule["confidence"]})"
 

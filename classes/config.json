@@ -32,35 +32,23 @@
         },
         "6": {
             "confidence": 0.8,
-            "rule": "FROM != SENDER",
-            "description": "The FROM header address does not match the SENDER header address.",
-            "ruleType": "header"
-        },
-        "7": {
-            "confidence": 0.8,
             "rule": "FROM != REPLY-TO",
             "description": "The FROM header address does not match the REPLY-TO header address.",
             "ruleType": "header"
         },
-        "8": {
+        "7": {
             "confidence": 0.8,
-            "rule": "SENDER != REPLY-TO",
-            "description": "The SENDER header address does not match the REPLY-TO header address.",
-            "ruleType": "header"
-        },
-        "9": {
-            "confidence": 0.6,
             "rule": "SENDER != RETURN-PATH",
             "description": "The SENDER header address does not match the RETURN-PATH header address.",
             "ruleType": "header"
         },
-        "10": {
+        "8": {
             "confidence": 0.4,
             "rule": "MESSAGE-ID",
             "description": "The MESSAGE-ID header is empty.",
             "ruleType": "null"
         },
-        "11": {
+        "9": {
             "confidence": 0.6,
             "rule": "MESSAGE-ID != [A-Za-z0-9-_.]+@[A-Za-z0-9-]+\\.(?:\\.?[A-Za-z0-9-]+){1,}",
             "description": "The MESSAGE-ID header does not match a valid address format.",
