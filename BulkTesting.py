@@ -15,7 +15,7 @@ import time
 import sys
 
 if len(sys.argv) == 1:
-    dir = "./data"
+    dir = input("Enter the relative or full path to a directory containing .eml files: ") 
 elif len(sys.argv) == 2:
     dir = sys.argv[1]
 else:

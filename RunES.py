@@ -1,8 +1,26 @@
 import os
+import sys
 
-from classes.EmlES import EmlES
+try:
+    from classes.EmlES import EmlES
+except FileNotFoundError as e:
+    print(f"FileNotFoundError: {e}")
+    exit(1)
+except RuntimeError as e:
+    print(f"RuntimeError: {e}")
+    exit(1)
+except Exception as e:
+    print(f"Unhandled exception caught: {e}")
+    exit(1)
 
-filePath = input("Enter the relative or full path to an .eml file: ")
+if len(sys.argv) == 1:
+    filePath = input("Enter the relative or full path to an .eml file: ")
+elif len(sys.argv) == 2:
+    filePath = sys.argv[1]
+else:
+    print("Too many arguments provided.")
+    exit(1)
+
 filePath = filePath.replace('"', "").replace('"', "").strip()
 
 if not os.path.exists(filePath):
