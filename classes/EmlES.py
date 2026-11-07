@@ -132,7 +132,7 @@ class EmlES:
                         if not "-1" in self.__reasoning.keys():
                             self.__reasoning["-1"] = []
 
-                        self.__reasoning["-1"].append(f"Invalid email address of {address} in the {header} header. (+0.6)")
+                        self.__reasoning["-1"].append(f"Invalid email address of {address} in the {header} header. (+0.7)")
 
                         if self.__confidence >= 1.0:
                             self.__confidence = 1.0
